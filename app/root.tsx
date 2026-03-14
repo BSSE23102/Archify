@@ -34,14 +34,19 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('archify-theme');if(t==='light')document.documentElement.classList.remove('dark');else document.documentElement.classList.add('dark');}catch(e){}})();`,
+          }}
+        />
       </head>
-      <body>
+      <body className="min-h-screen antialiased">
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -106,11 +111,10 @@ export default function App() {
 
   return (
     <AuthContext.Provider value={authValue}>
-      <Navbar />
-      <main className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-4xl font-bold">Archify</h1>
+      <div className="relative min-h-screen overflow-x-hidden">
+        <Navbar />
         <Outlet context={authValue} />
-      </main>
+      </div>
     </AuthContext.Provider>
   );
 }
