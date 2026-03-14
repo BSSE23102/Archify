@@ -1,3 +1,5 @@
+import { useCallback, useContext } from "react";
+import { useNavigate } from "react-router";
 import {
   ArrowRight,
   Building2,
@@ -13,6 +15,9 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { AuthContext } from "../../app/auth-context";
+import { visualizerSessionKey } from "../../lib/constant";
+import { Upload } from "../Upload";
 import { BeforeAfterSlider } from "./BeforeAfterSlider";
 
 const IMG = {
@@ -55,6 +60,23 @@ const community = [
 ];
 
 export function LandingPage() {
+  const auth = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const onUploadComplete = useCallback(
+    (base64Data: string) => {
+      const id = crypto.randomUUID();
+      try {
+        sessionStorage.setItem(visualizerSessionKey(id), base64Data);
+      } catch (e) {
+        console.error("Session storage full or unavailable", e);
+        return;
+      }
+      navigate(`/visualizer/${id}`);
+    },
+    [navigate]
+  );
+
   return (
     <div className="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
       {/* 1. Hero */}
@@ -323,11 +345,18 @@ export function LandingPage() {
                 <p className="text-xs font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   1 · Upload
                 </p>
-                <div className="mt-4 flex aspect-square items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 bg-white/50 dark:border-zinc-600 dark:bg-zinc-900/50">
-                  <ImageIcon className="h-12 w-12 text-zinc-400" aria-hidden />
+                <div className="mt-4 flex justify-center">
+                  <Upload
+                    isSignedIn={!!auth?.isSignedIn}
+                    onComplete={onUploadComplete}
+                  />
                 </div>
                 <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-                  Drop floor plan or sync from cloud.
+                  Sign in, then upload — you&apos;ll be sent to{" "}
+                  <code className="rounded bg-zinc-200 px-1 dark:bg-zinc-800">
+                    /visualizer/&lt;id&gt;
+                  </code>{" "}
+                  with your file in session.
                 </p>
               </div>
               <div className="border-b border-zinc-200 p-6 md:border-b-0 md:border-r dark:border-white/10">
@@ -356,15 +385,15 @@ export function LandingPage() {
                 <p className="text-xs font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   3 · Result
                 </p>
-                <div className="mt-4 overflow-hidden rounded-xl">
+                <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 dark:border-white/10">
                   <img
                     src={IMG.hero}
-                    alt="Final render"
+                    alt="Example final render"
                     className="aspect-square w-full object-cover"
                   />
                 </div>
                 <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-                  Share link + KV metadata persisted.
+                  After upload, the visualizer route shows your source + AI panel.
                 </p>
               </div>
             </div>
